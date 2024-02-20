@@ -55,12 +55,12 @@ const readDir = async (dir) => {
   }
 };
 
-const grayScale = async (filePath, pathProcessed) => {
-  await fs.promises.mkdir(pathProcessed, { recursive: true });
-  const data = await readDir(filePath);
+const grayScale = async (pathIn, pathOut) => {
+  await fs.promises.mkdir(pathOut, { recursive: true });
+  const data = await readDir(pathIn);
   let pngImgs = Object.values(data);
   for (const img of pngImgs) {
-    fs.createReadStream(`${filePath}/${img}`)
+    fs.createReadStream(`${pathIn}/${img}`)
       .pipe(
         new PNG({
           filterType: 4, // Transform stream
@@ -83,20 +83,20 @@ const grayScale = async (filePath, pathProcessed) => {
             // this.data[idx + 3] = this.data[idx + 3] >> 1; // opacity
           }
         }
-        this.pack().pipe(fs.createWriteStream(`${pathProcessed}/${img}`));
+        this.pack().pipe(fs.createWriteStream(`${pathOut}/${img}`));
       });
   }
 };
 
-const sepia = async (filePath, pathSepia) => {
-  await fs.promises.mkdir(pathSepia, { recursive: true });
-  const data = await readDir(filePath);
+const sepia = async (pathIn, pathOut) => {
+  await fs.promises.mkdir(pathOut, { recursive: true });
+  const data = await readDir(pathIn);
   let pngImgs = Object.values(data);
   for (const img of pngImgs) {
-    fs.createReadStream(`${filePath}/${img}`)
+    fs.createReadStream(`${pathIn}/${img}`)
       .pipe(
         new PNG({
-          filterType: 4, // Transform stream
+          filterType: 4,
         })
       )
       .on("parsed", function () {
@@ -109,25 +109,25 @@ const sepia = async (filePath, pathSepia) => {
               0.587 * this.data[idx + 1] +
               0.114 * this.data[idx + 2];
 
-            this.data[idx] = Math.min(255, luminance + 40); //R
-            this.data[idx + 1] = Math.min(255, luminance + 20); //G
-            this.data[idx + 2] = Math.min(255, luminance); //B
+            this.data[idx] = Math.min(255, luminance + 40);
+            this.data[idx + 1] = Math.min(255, luminance + 20);
+            this.data[idx + 2] = Math.min(255, luminance);
           }
         }
-        this.pack().pipe(fs.createWriteStream(`${pathSepia}/${img}`));
+        this.pack().pipe(fs.createWriteStream(`${pathOut}/${img}`));
       });
   }
 };
 
-const slumber = async (filePath, pathSlumber) => {
-  await fs.promises.mkdir(pathSlumber, { recursive: true });
-  const data = await readDir(filePath);
+const slumber = async (pathIn, pathOut) => {
+  await fs.promises.mkdir(pathOut, { recursive: true });
+  const data = await readDir(pathIn);
   let pngImgs = Object.values(data);
   for (const img of pngImgs) {
-    fs.createReadStream(`${filePath}/${img}`)
+    fs.createReadStream(`${pathIn}/${img}`)
       .pipe(
         new PNG({
-          filterType: 4, // Transform stream
+          filterType: 4,
         })
       )
       .on("parsed", function () {
@@ -144,12 +144,12 @@ const slumber = async (filePath, pathSlumber) => {
             const adjustGreen = (this.data[idx + 1] - luminance) * 0.2;
             const adjustBlue = (this.data[idx + 2] - luminance) * 0.3;
 
-            this.data[idx] = Math.min(255, luminance + adjustRed); //R
-            this.data[idx + 1] = Math.min(255, luminance + adjustGreen); //G
-            this.data[idx + 2] = Math.min(255, luminance + adjustBlue); //B
+            this.data[idx] = Math.min(255, luminance + adjustRed);
+            this.data[idx + 1] = Math.min(255, luminance + adjustGreen);
+            this.data[idx + 2] = Math.min(255, luminance + adjustBlue);
           }
         }
-        this.pack().pipe(fs.createWriteStream(`${pathSlumber}/${img}`));
+        this.pack().pipe(fs.createWriteStream(`${pathOut}/${img}`));
       });
   }
 };
