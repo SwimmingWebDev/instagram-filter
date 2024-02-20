@@ -14,43 +14,31 @@ const yauzl = require("yauzl-promise");
 const path = require("path");
 const PNG = require("pngjs").PNG;
 
-/**
- * Description: decompress file from given pathIn, write to given pathOut
- *
- * @param {string} pathIn
- * @param {string} pathOut
- * @return {promise}
- */
-
 const unzip = async (pathIn, pathOut) => {
-  const zip = await yauzl.open(pathIn);
-  await fs.promises.mkdir(pathOut, { recursive: true });
+  try {
+    const zip = await yauzl.open(pathIn);
+    await fs.promises.mkdir(pathOut, { recursive: true });
 
-  for await (const entry of zip) {
-    if (entry.filename.endsWith("/")) {
-      await fs.promises.mkdir(`${pathOut}/${entry.filename}`, {
-        recursive: true,
-      });
-    } else {
-      const readStream = await entry.openReadStream();
-      const writeStream = fs.createWriteStream(`${pathOut}/${entry.filename}`);
-      await pipeline(readStream, writeStream);
+    for await (const entry of zip) {
+      if (entry.filename.endsWith("/")) {
+        await fs.promises.mkdir(`${pathOut}/${entry.filename}`, {
+          recursive: true,
+        });
+      } else {
+        const readStream = await entry.openReadStream();
+        const writeStream = fs.createWriteStream(
+          `${pathOut}/${entry.filename}`
+        );
+        await pipeline(readStream, writeStream);
+      }
     }
-  }
 
-  await zip
-    .close()
-    .then(console.log("Extraction operation complete"))
-    .catch((err) => console.log(err));
+    await zip.close().then(console.log("Extraction operation complete"));
+  } catch (error) {
+    console.log(error);
+  }
 };
 
-/**
- * Description: read all the png files from given directory
- * and return Promise containing array of each png file path
- *
- * @param {string} path
- * @return {promise}
- */
 const readDir = async (dir) => {
   try {
     const file = await fs.promises.readdir(dir);
@@ -66,15 +54,6 @@ const readDir = async (dir) => {
     console.log(error);
   }
 };
-
-/**
- * Description: Read in png file by given pathIn,
- * convert to grayscale and write to given pathOut
- *
- * @param {string} filePath
- * @param {string} pathProcessed
- * @return {promise}
- */
 
 const grayScale = async (filePath, pathProcessed) => {
   await fs.promises.mkdir(pathProcessed, { recursive: true });
@@ -109,15 +88,6 @@ const grayScale = async (filePath, pathProcessed) => {
   }
 };
 
-/**
- * Description: Read in png file by given pathIn,
- * convert to grayscale and write to given pathOut
- *
- * @param {string} filePath
- * @param {string} pathSepia
- * @return {promise}
- */
-
 const sepia = async (filePath, pathSepia) => {
   await fs.promises.mkdir(pathSepia, { recursive: true });
   const data = await readDir(filePath);
@@ -148,15 +118,6 @@ const sepia = async (filePath, pathSepia) => {
       });
   }
 };
-
-/**
- * Description: Read in png file by given pathIn,
- * convert to grayscale and write to given pathOut
- *
- * @param {string} filePath
- * @param {string} pathSlumber
- * @return {promise}
- */
 
 const slumber = async (filePath, pathSlumber) => {
   await fs.promises.mkdir(pathSlumber, { recursive: true });
